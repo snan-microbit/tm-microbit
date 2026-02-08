@@ -38,19 +38,22 @@ export async function connectBLE() {
 
 /**
  * Envía datos a la micro:bit
- * @param {string} name - Nombre de la clase detectada
+ * @param {string} data - Cadena formateada (ej: "Clase#95")
  */
-export async function sendToMicrobit(name) {
+export async function sendToMicrobit(data) {
+    if (!data) return false; // Evitar envíos vacíos
+
     if (uartCharacteristic && bleDevice?.gatt.connected) {
         try {
             const encoder = new TextEncoder();
-            // Enviamos el nombre seguido de un salto de línea para procesar en MakeCode/Python
-            await uartCharacteristic.writeValue(encoder.encode(name + "\n"));
-            console.log("📤 Enviado: " + name);
+            // Mantenemos el "\n" porque es vital para que la micro:bit 
+            // sepa dónde termina el mensaje (delimitador)
+            await uartCharacteristic.writeValue(encoder.encode(data + "\n"));
+            console.log("📤 Enviado: " + data);
             return true;
         } catch (e) {
             console.warn("⚠️ Error en el envío de datos:", e);
-            throw e; // Lanzamos el error para que main.js pueda resetear la última predicción
+            throw e; 
         }
     }
     return false;

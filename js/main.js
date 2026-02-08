@@ -18,6 +18,8 @@ if ('serviceWorker' in navigator) {
 // --- VARIABLES DE CONTROL ---
 let lastPrediction = "";
 let isAppRunning = false;
+let lastSendTime = 0;
+const SEND_INTERVAL = 100; // 100ms equivale a 10 veces por segundo
 
 // --- INICIALIZACIÓN ---
 document.getElementById("btn-start").addEventListener("click", startApp);
@@ -65,25 +67,30 @@ async function startApp() {
 /**
  * PUENTE: Recibe predicciones de tm-handler y las envía a ble-handler
  */
-function handlePredictions(predictions) {
-    if (!isAppRunning || !predictions) return;
+async function handlePrediction(predictions) {
+    const currentTime = Date.now();
 
-    // Buscamos la clase con probabilidad mayor al 85%
-    for (let p of predictions) {
-        if (p.probability > 0.85) {
-            // Solo enviamos si la clase es distinta a la anterior para no saturar el Bluetooth
-            if (p.className !== lastPrediction) {
-                lastPrediction = p.className;
-                
-                // Actualizamos pantalla
-                ui.updateLabel(p.className);
-                
-                // Enviamos a la placa
-                sendToMicrobit(p.className).catch(() => {
-                    // Si falla el envío, reseteamos la última predicción para reintento
-                    lastPrediction = ""; 
-                });
-            }
+    // 1. Filtro de frecuencia: solo entra si pasaron 100ms o más
+    if (currentTime - lastSendTime >= SEND_INTERVAL) {
+        
+        // 2. Encontrar la clase con mayor probabilidad
+        const topPrediction = predictions.reduce((prev, current) => 
+            (prev.probability > current.probability) ? prev : current
+        );
+
+        // 3. Preparar el mensaje: "Nombre#Porcentaje"
+        // Math.round convierte 0.856 en 86
+        const certainty = Math.round(topPrediction.probability * 100);
+        const message = `${topPrediction.className}#${certainty}`;
+
+        try {
+            // 4. Enviar a través de tu módulo ble-handler.js
+            await sendToMicrobit(message);
+            
+            // 5. Actualizar el tiempo del último envío exitoso
+            lastSendTime = currentTime;
+        } catch (error) {
+            console.error("Error al enviar a micro:bit:", error);
         }
     }
 }
