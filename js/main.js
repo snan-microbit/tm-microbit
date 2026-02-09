@@ -83,6 +83,7 @@ async function handlePrediction(predictions) {
         // Math.round convierte 0.856 en 86
         const certainty = Math.round(topPrediction.probability * 100);
         const message = `${topPrediction.className}#${certainty}`;
+        updateLabel(mesage);
 
         try {
             // 4. Enviar a través de tu módulo ble-handler.js
@@ -112,6 +113,7 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
 
 
 
