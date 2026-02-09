@@ -19,7 +19,8 @@ if ('serviceWorker' in navigator) {
 let lastPrediction = "";
 let isAppRunning = false;
 let lastSendTime = 0;
-const SEND_INTERVAL = 350; 
+const SEND_INTERVAL = 350;
+let isSending = false;
 
 // --- NUEVAS VARIABLES PARA EL PROMEDIO ---
 let predictionStats = {}; // Formato: { "Clase A": acumulado_probabilidad, ... }
@@ -85,7 +86,7 @@ async function handlePrediction(predictions) {
     sampleCount++;
 
     // 2. FILTRO DE TIEMPO: ¿Ya pasaron los 350ms?
-    if (currentTime - lastSendTime >= SEND_INTERVAL) {
+    if (currentTime - lastSendTime >= SEND_INTERVAL && !isSending) {
         
         // 3. CÁLCULO DE PROMEDIOS: Buscamos la clase con el promedio más alto
         let topClass = "";
@@ -107,6 +108,7 @@ async function handlePrediction(predictions) {
 
         try {
             // 5. ENVIAR AL HARDWARE
+            isSending = true; // Bloqueamos el paso
             await sendToMicrobit(message);
             
             // 6. REINICIO DE CICLO: Limpiamos acumuladores y actualizamos tiempo
@@ -116,6 +118,8 @@ async function handlePrediction(predictions) {
             
         } catch (error) {
             console.error("Error al enviar a micro:bit:", error);
+        }finally {
+            isSending = false; // Liberamos el paso pase lo que pase
         }
     }
 }
@@ -135,6 +139,7 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
 
 
 
