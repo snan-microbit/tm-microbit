@@ -1,2 +1,3 @@
-https://snan-microbit.github.io/ml-microbit/
-hola
+https://snan-microbit.github.io/tm-microbit/
+https://teachablemachine.withgoogle.com/models/dLIe9GNGM/
+
