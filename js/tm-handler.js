@@ -17,6 +17,7 @@ export async function detectModelType(baseUrl) {
         
         if (metadata.packageName === "@teachablemachine/image") modelType = "image";
         else if (metadata.packageName === "@teachablemachine/pose") modelType = "pose";
+        else if (metadata.packageName === "@teachablemachine/audio") modelType = "audio";
         else modelType = "image"; // Por defecto
         
         return modelType;
@@ -100,3 +101,4 @@ export async function stopML() {
     
     console.log("IA y Webcam detenidas.");
 }
+
