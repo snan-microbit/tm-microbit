@@ -19,7 +19,7 @@ if ('serviceWorker' in navigator) {
 let lastPrediction = "";
 let isAppRunning = false;
 let lastSendTime = 0;
-const SEND_INTERVAL = 100; // 100ms equivale a 10 veces por segundo
+const SEND_INTERVAL = 200; // 200ms equivale a 5 veces por segundo
 
 // --- INICIALIZACIÓN ---
 document.getElementById("btn-start").addEventListener("click", startApp);
@@ -112,4 +112,5 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
 
