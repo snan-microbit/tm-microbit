@@ -19,7 +19,7 @@ if ('serviceWorker' in navigator) {
 let lastPrediction = "";
 let isAppRunning = false;
 let lastSendTime = 0;
-const SEND_INTERVAL = 350; // 200ms equivale a 5 veces por segundo
+const SEND_INTERVAL = 350; 
 
 // --- INICIALIZACIÓN ---
 document.getElementById("btn-start").addEventListener("click", startApp);
@@ -71,7 +71,7 @@ async function startApp() {
 async function handlePrediction(predictions) {
     const currentTime = Date.now();
 
-    // 1. Filtro de frecuencia: solo entra si pasaron 100ms o más
+    // 1. Filtro de frecuencia: solo entra si pasaron 350ms o más
     if (currentTime - lastSendTime >= SEND_INTERVAL) {
         
         // 2. Encontrar la clase con mayor probabilidad
@@ -113,6 +113,7 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
 
 
 
