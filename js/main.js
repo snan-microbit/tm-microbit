@@ -40,8 +40,9 @@ async function startApp() {
     try {
         // 2. Paso crítico: Conectar al hardware
         const connected = await connectBLE();
+        
         if (!connected) return; // Si el usuario cancela la búsqueda de Bluetooth, detenemos.
-
+        ui.showAlert("Conectado. Cargando modelo de IA...");
         // 3. Detectar y preparar la IA
         const modelType = await detectModelType(TM_MODEL_URL);
         
@@ -111,3 +112,4 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
