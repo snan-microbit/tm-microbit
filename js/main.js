@@ -19,7 +19,7 @@ if ('serviceWorker' in navigator) {
 let lastPrediction = "";
 let isAppRunning = false;
 let lastSendTime = 0;
-const SEND_INTERVAL = 350;
+const SEND_INTERVAL = 100;
 let isSending = false;
 
 // --- NUEVAS VARIABLES PARA EL PROMEDIO ---
@@ -139,6 +139,7 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
 
 
 
