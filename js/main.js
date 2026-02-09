@@ -21,6 +21,10 @@ let isAppRunning = false;
 let lastSendTime = 0;
 const SEND_INTERVAL = 350; 
 
+// --- NUEVAS VARIABLES PARA EL PROMEDIO ---
+let predictionStats = {}; // Formato: { "Clase A": acumulado_probabilidad, ... }
+let sampleCount = 0;      // Cuántas veces hemos sumado predicciones
+
 // --- INICIALIZACIÓN ---
 document.getElementById("btn-start").addEventListener("click", startApp);
 
@@ -66,37 +70,55 @@ async function startApp() {
 }
 
 /**
- * PUENTE: Recibe predicciones de tm-handler y las envía a ble-handler
+ * PUENTE: Recibe predicciones de tm-handler y calcula promedios
  */
 async function handlePrediction(predictions) {
     const currentTime = Date.now();
 
-    // 1. Filtro de frecuencia: solo entra si pasaron 350ms o más
+    // 1. ACUMULACIÓN: Sumamos las probabilidades actuales al total
+    predictions.forEach(p => {
+        if (!predictionStats[p.className]) {
+            predictionStats[p.className] = 0;
+        }
+        predictionStats[p.className] += p.probability;
+    });
+    sampleCount++;
+
+    // 2. FILTRO DE TIEMPO: ¿Ya pasaron los 350ms?
     if (currentTime - lastSendTime >= SEND_INTERVAL) {
         
-        // 2. Encontrar la clase con mayor probabilidad
-        const topPrediction = predictions.reduce((prev, current) => 
-            (prev.probability > current.probability) ? prev : current
-        );
+        // 3. CÁLCULO DE PROMEDIOS: Buscamos la clase con el promedio más alto
+        let topClass = "";
+        let maxAverage = -1;
 
-        // 3. Preparar el mensaje: "Nombre#Porcentaje"
-        // Math.round convierte 0.856 en 86
-        const certainty = Math.round(topPrediction.probability * 100);
-        const message = `${topPrediction.className}#${certainty}`;
+        for (const className in predictionStats) {
+            const average = predictionStats[className] / sampleCount;
+            if (average > maxAverage) {
+                maxAverage = average;
+                topClass = className;
+            }
+        }
+
+        // 4. PREPARAR EL MENSAJE: "Nombre#PorcentajePromedio"
+        const certainty = Math.round(maxAverage * 100);
+        const message = `${topClass}#${certainty}`;
+        
         ui.updateLabel(message);
 
         try {
-            // 4. Enviar a través de tu módulo ble-handler.js
+            // 5. ENVIAR AL HARDWARE
             await sendToMicrobit(message);
             
-            // 5. Actualizar el tiempo del último envío exitoso
+            // 6. REINICIO DE CICLO: Limpiamos acumuladores y actualizamos tiempo
+            predictionStats = {};
+            sampleCount = 0;
             lastSendTime = currentTime;
+            
         } catch (error) {
             console.error("Error al enviar a micro:bit:", error);
         }
     }
 }
-
 /**
  * RESETEO GENERAL: Detiene todos los procesos
  */
@@ -113,6 +135,7 @@ async function resetApp() {
 window.onpopstate = async function(event) {
     await resetApp();
 };
+
 
 
 
