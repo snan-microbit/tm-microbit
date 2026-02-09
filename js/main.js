@@ -47,7 +47,7 @@ async function startApp() {
         
         if (modelType === "image") {
             // Pasamos 'handlePredictions' como callback para recibir los resultados
-            await startVisualML(TM_MODEL_URL, modelType, handlePredictions);
+            await startVisualML(TM_MODEL_URL, modelType, handlePrediction);
             
             // 4. Actualizar estado y navegación
             isAppRunning = true;
