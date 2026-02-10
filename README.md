@@ -1,6 +1,6 @@
 
 https://snan-microbit.github.io/tm-microbit/
+https://teachablemachine.withgoogle.com/models/Xsx62cdupm/
 
-https://teachablemachine.withgoogle.com/models/dLIe9GNGM/
 
 
